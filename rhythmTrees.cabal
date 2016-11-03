@@ -1,0 +1,9 @@
+name:              rhythmTrees
+version:           1.0
+Build-Type:        Simple
+cabal-version:     >= 1.2
+
+executable rhythmTrees
+  main-is:         Main.hs
+  hs-source-dirs:  src
+  build-depends:   base, lilypond, prettify, Euterpea
