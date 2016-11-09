@@ -1,27 +1,34 @@
 module Main where
 
-import Music.Lilypond as Lilypond
-import Euterpea
+import Music.Lilypond as LP
+import Euterpea as E
 import Text.Pretty
 import Data.Ratio
+import System.Random
 
-import Tree
+import RhythmTree as RT
 
 getDurations :: RhythmTree -> [(RhythmElement, Rational)]
 getDurations tree = inner tree 3
     where inner (Single e) n = [(e, n)]
-          inner (Branch xs) n = concatMap (\ t -> inner t (n / ((toRational (length xs))))) xs
+          inner (Branch xs) n = concatMap (\ t -> inner t (n / toRational (length xs))) xs
 
-toEuterpea :: RhythmTree -> Euterpea.Music Euterpea.Pitch
-toEuterpea tree = Modify (Euterpea.Tempo 2) (line (map inner (getDurations tree)))
-    where inner (NoteElement, n) = Euterpea.note n (Euterpea.C, 3)
-          inner (RestElement, n) = Euterpea.rest n
+toEuterpea :: RhythmTree -> E.Music E.Pitch
+toEuterpea tree = Modify (E.Tempo 2) (line (map inner (getDurations tree)))
+    where inner (RT.Note, n) = E.note n (E.C, 3)
+          inner (RT.Rest, n) = E.rest n
 
 toLilypond :: RhythmTree -> String
 toLilypond tree = (show . pretty) (New "Test" Nothing (Sequential (map inner (getDurations tree))))
-    where inner (NoteElement, n) = (Lilypond.Note (NotePitch (Lilypond.Pitch (Lilypond.C, 0, 0)) Nothing) (Just (Duration n)) [])
-          inner (RestElement, n) = (Lilypond.Rest (Just (Duration n)) [])
+    where inner (RT.Note, n) = LP.Note (NotePitch (LP.Pitch (LP.C, 0, 0)) Nothing) (Just (Duration n)) []
+          inner (RT.Rest, n) = LP.Rest (Just (Duration n)) []
+
+-- main :: IO ()
+-- main = do
+--     (print . toLilypond) testTree
+--     (play . toEuterpea) testTree
 
 main = do
-    (print . toLilypond) testTree
-    (play . toEuterpea) testTree
+    tree <- RT.randomTree
+    print tree
+    (play . toEuterpea) tree
