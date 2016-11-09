@@ -32,3 +32,5 @@ main = do
     tree <- RT.randomTree
     print tree
     (play . toEuterpea) tree
+
+-- main = RT.test

@@ -3,7 +3,6 @@ module RhythmTree where
 import System.Random
 import Control.Monad.Random
 import Control.Monad
-import Data.Functor.Identity
 
 data RhythmElement = Note | Rest-- | Tie
     deriving (Show, Eq, Enum, Bounded)
@@ -18,18 +17,36 @@ instance Random RhythmElement where
     random = randomR (minBound, maxBound)
 
 randomTree :: IO RhythmTree
-randomTree = evalRandIO (genSub 4)
+randomTree = do
+    tree <- evalRandIO (genSub 4)
+    return $ simplify tree
         where 
-            genSub :: Int -> RandT StdGen Identity RhythmTree
+            genSub :: MonadRandom t => Int -> t RhythmTree
             genSub n = do 
                 v <- getRandomR (0,n)
                 if v == 0
                     then do
-                        i <- getRandomR (0,1)
-                        return $ Single $ [Note, Rest] !! i
+                        i <- getRandomR (0, length ([minBound .. maxBound] :: [RhythmElement]) -1)
+                        return $ Single $ toEnum i
                     else do
                         s <- replicateM v (genSub (n-1))
                         return $ Branch s
+
+simplifyOnce :: RhythmTree -> RhythmTree
+simplifyOnce (Branch a) | length a == 1 = head a
+                        | otherwise     = Branch $ map simplifyOnce a
+simplifyOnce (Single a) = Single a
+
+simplify :: RhythmTree -> RhythmTree
+simplify tree | tree == simpleTree = tree
+              | otherwise          = simplify simpleTree
+              where simpleTree = simplifyOnce tree
+
+test = do
+    let tree = Branch [Single Rest,Single Note,Branch [Branch [Single Rest,Branch [Single Note]]],Branch [Branch [Branch [Single Rest]]]]
+    print tree
+    print $ simplify tree
+    print $ tree == tree
 
 testTree :: RhythmTree
 testTree = Branch [
