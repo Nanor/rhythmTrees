@@ -9,7 +9,7 @@ import System.Random
 import RhythmTree as RT
 
 getDurations :: RhythmTree -> [(RhythmElement, Rational)]
-getDurations tree = inner tree 3
+getDurations tree = inner tree 2
     where inner (Single e) n = [(e, n)]
           inner (Branch xs) n = concatMap (\ t -> inner t (n / toRational (length xs))) xs
 
@@ -22,15 +22,8 @@ toLilypond :: RhythmTree -> String
 toLilypond tree = (show . pretty) (New "Test" Nothing (Sequential (map inner (getDurations tree))))
     where inner (RT.Note, n) = LP.Note (NotePitch (LP.Pitch (LP.C, 0, 0)) Nothing) (Just (Duration n)) []
           inner (RT.Rest, n) = LP.Rest (Just (Duration n)) []
-
--- main :: IO ()
--- main = do
---     (print . toLilypond) testTree
---     (play . toEuterpea) testTree
-
+          
 main = do
     tree <- RT.randomTree
     print tree
     (play . toEuterpea) tree
-
--- main = RT.test

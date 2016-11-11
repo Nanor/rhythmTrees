@@ -10,11 +10,9 @@ data RhythmElement = Note | Rest-- | Tie
 data RhythmTree = Single RhythmElement | Branch [RhythmTree]
     deriving (Show, Eq)
 
-instance Random RhythmElement where
-    randomR (a, b) g =
-        case randomR (fromEnum a, fromEnum b) g of
-            (x, g') -> (toEnum x, g')
-    random = randomR (minBound, maxBound)
+contents :: RhythmTree -> [RhythmTree]
+contents (Branch a) = a
+contents (Single a) = [Single a]
 
 randomTree :: IO RhythmTree
 randomTree = do
@@ -33,51 +31,13 @@ randomTree = do
                         return $ Branch s
 
 simplifyOnce :: RhythmTree -> RhythmTree
-simplifyOnce (Branch a) | length a == 1 = head a
-                        | otherwise     = Branch $ map simplifyOnce a
+simplifyOnce (Branch [a]) = a
+simplifyOnce (Branch a) | allEqualLength a = Branch $ concatMap contents a
+                        | otherwise        = Branch $ map simplifyOnce a
+                        where allEqualLength (x:xs) = all (== (length . contents) x) (map (length . contents) xs)
 simplifyOnce (Single a) = Single a
 
 simplify :: RhythmTree -> RhythmTree
 simplify tree | tree == simpleTree = tree
               | otherwise          = simplify simpleTree
               where simpleTree = simplifyOnce tree
-
-test = do
-    let tree = Branch [Single Rest,Single Note,Branch [Branch [Single Rest,Branch [Single Note]]],Branch [Branch [Branch [Single Rest]]]]
-    print tree
-    print $ simplify tree
-    print $ tree == tree
-
-testTree :: RhythmTree
-testTree = Branch [
-        Branch [
-            Single Note,
-            Single Rest,
-            Single Note,
-            Single Note,
-            Single Rest,
-            Single Note,
-            Single Note,
-            Single Rest
-        ],
-        Branch [
-            Single Rest,
-            Single Note,
-            Single Rest,
-            Single Rest,
-            Single Note,
-            Single Rest,
-            Single Rest,
-            Single Note
-        ],
-        Branch [
-            Branch [
-                Single Rest,
-                Branch [
-                    Single Note,
-                    Single Rest
-                ]
-            ],
-            Single Rest
-        ]
-    ]
