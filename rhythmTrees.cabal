@@ -6,18 +6,18 @@ cabal-version:     >= 1.10
 executable RhythmTrees
   main-is:          Main.hs
   hs-source-dirs:   src
-  build-depends:    base, lilypond, prettify, Euterpea, random, MonadRandom
+  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom
   default-language: Haskell2010
 
 library
-  exposed-modules:  RhythmTree
+  exposed-modules:  RhythmTree, Exporter
   hs-source-dirs:   src
-  build-depends:    base, lilypond, prettify, Euterpea, random, MonadRandom
+  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom
   default-language: Haskell2010
 
 test-suite test
   main-is:          Spec.hs
   hs-source-dirs:   test
-  build-depends:    base, RhythmTrees, hspec, QuickCheck, Cabal
+  build-depends:    base, RhythmTrees, hspec, QuickCheck, Cabal, Euterpea
   type:             exitcode-stdio-1.0
   default-language: Haskell2010

@@ -1,8 +1,7 @@
 module RhythmTree where
 
-import System.Random
-import Control.Monad.Random
 import Control.Monad
+import Control.Monad.Random
 
 data RhythmElement = Note | Rest-- | Tie
     deriving (Show, Eq, Enum, Bounded)
