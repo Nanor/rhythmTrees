@@ -31,9 +31,12 @@ randomTree = do
 
 simplifyOnce :: RhythmTree -> RhythmTree
 simplifyOnce (Branch [a]) = a
-simplifyOnce (Branch a) | allEqualLength a = Branch $ concatMap contents a
+simplifyOnce (Branch a) | allRests a       = Single Rest
+                        | allEqualLength a = Branch $ concatMap contents a
                         | otherwise        = Branch $ map simplifyOnce a
-                        where allEqualLength (x:xs) = all (== (length . contents) x) (map (length . contents) xs)
+                        where 
+                            allRests b@(_:_)      = all (== Single Rest) b
+                            allEqualLength (x:xs) = all (== (length . contents) x) (map (length . contents) xs)
 simplifyOnce (Single a) = Single a
 
 simplify :: RhythmTree -> RhythmTree

@@ -26,3 +26,7 @@ spec = do
         it "should simplify multiple times" $
             simplify (Branch [Branch [Branch [Branch [Single Note, Single Rest]]]]) `shouldBe`
                 Branch [Single Note, Single Rest]
+
+        it "should collapse a branch of all rests" $
+            simplify (Branch [Single Rest, Single Rest]) `shouldBe`
+                Single Rest
