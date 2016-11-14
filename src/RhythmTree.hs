@@ -2,6 +2,8 @@ module RhythmTree where
 
 import Control.Monad
 import Control.Monad.Random
+import Data.List.Split
+import Data.List
 
 data RhythmElement = Note | Rest-- | Tie
     deriving (Show, Eq, Enum, Bounded)
@@ -31,12 +33,23 @@ randomTree = do
 
 simplifyOnce :: RhythmTree -> RhythmTree
 simplifyOnce (Branch [a]) = a
-simplifyOnce (Branch a) | allRests a       = Single Rest
-                        | allEqualLength a = Branch $ concatMap contents a
-                        | otherwise        = Branch $ map simplifyOnce a
-                        where 
-                            allRests b@(_:_)      = all (== Single Rest) b
-                            allEqualLength (x:xs) = all (== (length . contents) x) (map (length . contents) xs)
+simplifyOnce (Branch a) = Branch $ map simplifyOnce $ (colapseRests . concatBranches) a
+    where
+        colapseRests :: [RhythmTree] -> [RhythmTree]
+        colapseRests b = maybe b (map removeRests) part
+            where
+                removeRests :: [RhythmTree] -> RhythmTree
+                removeRests b | all (== Single Rest) b = Single Rest
+                              | otherwise              = Branch b 
+                part :: Maybe [[RhythmTree]]
+                part = find (any $ all (== Single Rest)) $ split b
+                factors :: Int -> [Int]
+                factors n = [i | i <-[1..n], mod n i == 0]
+                split :: [a] -> [[[a]]]
+                split l = [chunksOf n l | n <- (tail . factors . length) l]
+        concatBranches :: [RhythmTree] -> [RhythmTree]
+        concatBranches b@(x:xs) | all (== (length . contents) x) (map (length . contents) xs) = concatMap contents b
+                                | otherwise = b
 simplifyOnce (Single a) = Single a
 
 simplify :: RhythmTree -> RhythmTree

@@ -30,3 +30,10 @@ spec = do
         it "should collapse a branch of all rests" $
             simplify (Branch [Single Rest, Single Rest]) `shouldBe`
                 Single Rest
+
+        it "should collapse multiple rests in a branch" $ do
+            simplify (Branch [Single Rest, Single Rest, Single Note, Single Note]) `shouldBe`
+                Branch [Single Rest, Branch [Single Note, Single Note]]
+
+            simplify (Branch [Single Rest, Single Rest, Single Rest, Single Note, Single Note, Single Note, Single Rest, Single Rest, Single Rest]) `shouldBe`
+                Branch [Single Rest, Branch [Single Note, Single Note, Single Note], Single Rest]
