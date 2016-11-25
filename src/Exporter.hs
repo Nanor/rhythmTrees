@@ -17,7 +17,7 @@ toEuterpea tree = Modify (E.Tempo 1) (line (map inner (getDurations tree)))
           inner (RT.Rest, n) = E.rest n
 
 toLilypond :: RhythmTree -> String
-toLilypond tree = (show . pretty) (New "Test" Nothing (Sequential (map inner (getDurations tree))))
-    where inner (RT.Note, n) = LP.Note (NotePitch (LP.Pitch (LP.C, 0, 0)) Nothing) (Just (Duration n)) []
+toLilypond tree = (show . pretty) (New "RhythmicStaff" Nothing (Sequential (map inner (getDurations tree))))
+    where inner (RT.Note, n) = LP.Note (NotePitch (LP.Pitch (LP.C, 0, 4)) Nothing) (Just (Duration n)) []
           inner (RT.Rest, n) = LP.Rest (Just (Duration n)) []
           
