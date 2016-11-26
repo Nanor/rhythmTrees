@@ -3,8 +3,11 @@ module Main where
 import RhythmTree
 import Exporter
 import Euterpea
+import Importer
+import System.Environment
 
 main = do
-    tree <- randomTree
-    print tree
-    (play . toEuterpea) tree
+    fn <- getArgs
+    music <- readMidi $ head fn
+    play music
+    -- print music

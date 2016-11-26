@@ -2,4 +2,5 @@ out/
 dist/
 .idea/
 .vscode/
+midi/
 rhythmTrees.iml
