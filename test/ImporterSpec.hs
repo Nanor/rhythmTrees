@@ -4,6 +4,7 @@ import Test.Hspec
 import RhythmTree as RT
 import Euterpea as E
 import Data.Ratio
+import Control.Exception.Base
 
 import Importer
 
@@ -23,3 +24,20 @@ spec = do
         it "should convert back to the correct RhythmTree" $
             fromEuterpea (line [note qn ((C, 3), []), note en ((C, 3), []), note en ((C, 3), []), rest hn]) `shouldBe`
                 Branch [Branch [Single RT.Note, Branch [Single RT.Note, Single RT.Note]], Single RT.Rest]
+    describe "splitIntoN" $ do
+        it "should split a list correctly" $
+            splitIntoN [(RT.Note, 1), (RT.Note, 1), (RT.Note, 2)] 2 `shouldBe`
+                Just [[(RT.Note, 1), (RT.Note, 1)], [(RT.Note, 2)]]
+        it "should fail if it doesn't split equally" $
+            splitIntoN [(RT.Note, 1), (RT.Note, 1), (RT.Note, 2)] 3 `shouldBe`
+                Nothing
+        it "should fail if it splits with some left over" $
+            splitIntoN [(RT.Note, 1), (RT.Note, 2), (RT.Note, 2)] 3 `shouldBe`
+                Nothing
+    describe "splitEqually" $ do 
+        it "should split a list correctly" $
+            splitEqually [(RT.Note, 1), (RT.Note, 1), (RT.Note, 2)] `shouldBe`
+                [[(RT.Note, 1), (RT.Note, 1)], [(RT.Note, 2)]]
+        it "should fail if it doesn't split equally" $
+            evaluate (splitEqually [(RT.Note, 1), (RT.Note, 2), (RT.Note, 2)]) `shouldThrow`
+                anyException
