@@ -37,3 +37,18 @@ spec = do
 
             simplify (Branch [Single Rest, Single Rest, Single Rest, Single Note, Single Note, Single Note, Single Rest, Single Rest, Single Rest]) `shouldBe`
                 Branch [Single Rest, Branch [Single Note, Single Note, Single Note], Single Rest]
+
+        it "should collapse multiple ties" $
+            simplify (Branch [Single Note, Single Note, Branch [Single Tie, Single Tie]]) `shouldBe`
+                Branch [Single Note, Single Note, Single Tie]
+
+        it "should collapse a note followed by ties" $ do
+            simplify (Branch [Single Note, Single Note, Branch [Single Note, Single Tie, Single Tie]]) `shouldBe`
+                Branch [Single Note, Single Note, Single Note]
+
+            simplify (Branch [Single Note, Single Tie, Single Note, Single Tie]) `shouldBe`
+                Branch [Single Note, Single Note]
+
+        it "should replace tied rests with rests" $
+            simplify (Branch [Single Note, Single Rest, Single Tie]) `shouldBe`
+                Branch [Single Note, Single Rest, Single Rest]
