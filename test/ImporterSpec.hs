@@ -39,5 +39,5 @@ spec = do
             splitEqually [(RT.Note, 1), (RT.Note, 1), (RT.Note, 2)] `shouldBe`
                 [[(RT.Note, 1), (RT.Note, 1)], [(RT.Note, 2)]]
         it "should fail if it doesn't split equally" $
-            evaluate (splitEqually [(RT.Note, 1), (RT.Note, 2), (RT.Note, 2)]) `shouldThrow`
-                anyException
+            splitEqually [(RT.Note, 1), (RT.Note, 2), (RT.Note, 2)] `shouldBe`
+                [[(RT.Note, 1)], [(RT.Note, 1)], [(RT.Tie, 1)], [(RT.Note, 1)], [(RT.Tie, 1)]]

@@ -8,9 +8,16 @@ import RhythmTree as RT
 
 -- Converts a RhythmTree into a list of RhythmElements and their durations
 getDurations :: RhythmTree -> [(RhythmElement, Rational)]
-getDurations tree = inner tree 1
-    where inner (Single e) n = [(e, n)]
-          inner (Branch xs) n = concatMap (\ t -> inner t (n / toRational (length xs))) xs
+getDurations tree = removeTies $ toList tree 1
+    where
+        toList :: RhythmTree -> Rational -> [(RhythmElement, Rational)]
+        toList (Single e) n = [(e, n)]
+        toList (Branch xs) n = concatMap (\ t -> toList t (n / toRational (length xs))) xs
+        removeTies :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)] 
+        removeTies (x@(xType, xDur) : y@(yType, yDur) : xs) | yType == RT.Tie = removeTies $ (xType, xDur + yDur) : xs
+                                                            | otherwise       = x : removeTies (y : xs)
+        removeTies [x] = [x]
+        removeTies [] = []
 
 -- Converts a RhythmTree into a Euterpea Music1 format for audio playback
 toEuterpea :: RhythmTree -> Music1

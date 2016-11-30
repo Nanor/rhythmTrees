@@ -6,9 +6,10 @@ import Euterpea
 import Importer
 import System.Environment
 
+import TestFile
+
 main = do
     fn <- getArgs
     music <- readMidi $ head fn
     play music
-    print $ unpack music
     print $ fromEuterpea music

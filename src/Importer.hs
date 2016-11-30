@@ -5,6 +5,7 @@ import Codec.Midi
 import RhythmTree as RT
 import Data.List
 import Data.Maybe
+import Data.Ratio
 
 -- Reads from a midi file into a Euterpea piece of music
 readMidi :: FilePath -> IO Music1
@@ -18,7 +19,7 @@ readMidi fn = do
 
 -- Turns a piece of music into a RhythmTree
 fromEuterpea :: Music1 -> RhythmTree
-fromEuterpea = toRhythmTree . unpack
+fromEuterpea = simplify . toRhythmTree . unpack
 
 -- Turns a sequence of note, duration pairs into a RhythmTree
 toRhythmTree :: [(RhythmElement, Rational)] -> RhythmTree
@@ -29,8 +30,16 @@ toRhythmTree xs = Branch $ map toRhythmTree $ splitEqually xs
 splitEqually :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]]
 splitEqually l = inner l (snd $ head l) (tail l)
     where
-        inner l _ [] = error $ "Could not split list: " ++ show l --TODO: use ties so that [1%4, 3%4] can be represented as a tree
+        inner l _ [] = factorize l
         inner l n xs = fromMaybe (inner l (n + snd (head xs)) (tail xs)) (splitIntoN l n)
+
+factorize :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]]
+factorize l = map (: []) $ concatMap inner l
+    where
+        inner :: (RhythmElement, Rational) -> [(RhythmElement, Rational)]
+        inner (noteType, duration) = (noteType, divisor) : replicate (fromInteger $ numerator (duration / divisor) - 1) (RT.Tie, divisor)
+        divisor = foldl gcdRat 1 $ map snd l
+        gcdRat a b = gcd (numerator a) (numerator b) % lcm (denominator a) (denominator b)
 
 splitIntoN :: [(RhythmElement, Rational)] -> Rational -> Maybe [[(RhythmElement, Rational)]]
 splitIntoN = inner []
