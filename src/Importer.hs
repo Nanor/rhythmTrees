@@ -23,15 +23,28 @@ fromEuterpea = simplify . toRhythmTree . unpack
 
 -- Turns a sequence of note, duration pairs into a RhythmTree
 toRhythmTree :: [(RhythmElement, Rational)] -> RhythmTree
-toRhythmTree [(x, _)] = Single x
-toRhythmTree xs = Branch $ map toRhythmTree $ splitEqually xs
+toRhythmTree xs = Branch $ map inner $ splitIntoBars xs
+    where
+        inner [(x, _)] = Single x
+        inner xs = Branch $ map inner $ splitEqually xs
+
+splitIntoBars :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]] 
+splitIntoBars l = inner [] l 1
+    where
+        inner [] [] _ = []
+        inner xs l n | sum (map snd xs) == n = xs : inner [] l n
+                     | sum (map snd xs) > n  = (init xs ++ [(fst (last xs), n - sum (map snd (init xs)))]) : inner [] ((RT.Tie, sum (map snd xs) - n) : l) n
+                     | null l                = [xs ++ [(RT.Rest, n - sum (map snd xs))]]
+                     | otherwise             = inner (xs ++ [head l]) (tail l) n
 
 -- Splits a list of RhythmElements and durations into equal duration sublists, or errors
 splitEqually :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]]
-splitEqually l = inner l (snd $ head l) (tail l)
+splitEqually l = inner l (snd $ head l) (possibleSplits (snd $ head l) (sum $ map snd l))
     where
         inner l _ [] = factorize l
-        inner l n xs = fromMaybe (inner l (n + snd (head xs)) (tail xs)) (splitIntoN l n)
+        inner l n xs = fromMaybe (inner l (head xs) (tail xs)) (splitIntoN l n)
+        possibleSplits :: Rational -> Rational -> [Rational]
+        possibleSplits smallest total = takeWhile (>= smallest) [total / n | n <- [2..]] 
 
 factorize :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]]
 factorize l = map (: []) $ concatMap inner l
