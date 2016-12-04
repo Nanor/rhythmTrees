@@ -8,14 +8,14 @@ import Data.Maybe
 import Data.Ratio
 
 -- Reads from a midi file into a Euterpea piece of music
-readMidi :: FilePath -> IO Music1
+readMidi :: FilePath -> IO [Music1]
 readMidi fn = do
     file <- importFile fn
     case file of 
         Left err -> error err
         Right midi -> do
             let Midi _ timeDiv tracks = midi
-            return $ fromMidi $ Midi SingleTrack timeDiv [tracks !! 1]
+            return $ filter (/= Prim (E.Rest (0 % 1))) $ map (\ t -> fromMidi $ Midi SingleTrack timeDiv [t]) tracks
 
 -- Turns a piece of music into a RhythmTree
 fromEuterpea :: Music1 -> RhythmTree

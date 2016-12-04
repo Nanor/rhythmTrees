@@ -1,9 +1,10 @@
-module Exporter (toLilypond, toEuterpea) where
+module Exporter (toLilypond, toEuterpea, toAscii) where
 
 import Music.Lilypond as LP
 import Euterpea as E
 import Text.Pretty
-
+import Data.Tree
+import Data.Tree.Pretty
 import RhythmTree as RT
 
 -- Converts a RhythmTree into a list of RhythmElements and their durations
@@ -31,3 +32,8 @@ toLilypond tree = (show . pretty) (New "RhythmicStaff" Nothing (Sequential (map 
     where inner (RT.Note, n) = LP.Note (NotePitch (LP.Pitch (LP.C, 0, 4)) Nothing) (Just (Duration n)) []
           inner (RT.Rest, n) = LP.Rest (Just (Duration n)) []
           
+toAscii :: RhythmTree -> String
+toAscii = drawVerticalTree . convert
+    where
+        convert (Branch b) = Node "" $ map convert b
+        convert (Single x) = Node (show x) [] 
