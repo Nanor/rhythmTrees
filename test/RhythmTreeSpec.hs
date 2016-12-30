@@ -52,3 +52,16 @@ spec = do
         it "should replace tied rests with rests" $
             simplify (Branch [Single Note, Single Rest, Single Tie]) `shouldBe`
                 Branch [Single Note, Single Rest, Single Rest]
+
+    describe "compareTrees" $ do
+        it "should return 0 for identical leaf nodes" $
+            compareTrees (Single Note) (Single Note) `shouldBe` 0
+        it "should return 1 for different leaf nodes" $
+            compareTrees (Single Note) (Single Rest) `shouldBe` 1
+        it "should return 0 for identical trees" $
+            compareTrees (Branch [Single Note, Branch [Single Note, Single Rest]]) (Branch [Single Note, Branch [Single Note, Single Rest]]) `shouldBe` 0
+        it "should return 1 for trees with one difference" $
+            compareTrees (Branch [Single Note, Branch [Single Note, Single Note]]) (Branch [Single Note, Branch [Single Note, Single Rest]]) `shouldBe` 1
+        it "should return 2 for a swap" $
+            compareTrees (Branch [Single Note, Branch [Single Note, Single Rest]]) (Branch [Branch [Single Note, Single Rest], Single Note]) `shouldBe` 2
+

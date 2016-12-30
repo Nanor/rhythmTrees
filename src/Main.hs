@@ -9,5 +9,5 @@ import System.Environment
 main = do
     fn <- getArgs
     music <- readMidi $ head fn
-    -- -- play music
+    -- play music
     (putStr . unlines) $ map (toAscii . fromEuterpea) music

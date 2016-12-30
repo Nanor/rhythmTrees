@@ -70,3 +70,23 @@ simplifyOnce (Branch a) = Branch $ map simplifyOnce $
             removeTiedRests (x:y:xs) | (x == Single Rest) && (y == Single Tie) = x : removeTiedRests (Single Rest : xs)
                                      | otherwise                               = x : removeTiedRests (y:xs)
 simplifyOnce (Single a) = Single a
+
+compareTrees :: RhythmTree -> RhythmTree -> Int
+compareTrees (Single a) (Single b) | a == b    = 0
+                                   | otherwise = 1
+compareTrees (Single a) (Branch b) = sum (map (compareTrees (Single a)) b)
+compareTrees (Branch a) (Single b) = compareTrees (Single b) (Branch a)
+compareTrees (Branch a) (Branch b) = inner a b (length a) (length b)
+    where
+        inner :: [RhythmTree] -> [RhythmTree] -> Int -> Int -> Int
+        inner _ _ 0 0 = 0
+        inner a b x 0 = inner a b (x - 1) 0 + cost (a !! (x - 1))
+        inner a b 0 y = inner a b 0 (y - 1) + cost (b !! (y - 1))
+        inner a b x y = minimum [
+                inner a b (x - 1) y + cost (a !! (x - 1)),
+                inner a b x (y - 1) + cost (b !! (y - 1)),
+                inner a b (x - 1) (y - 1) + compareTrees (a !! (x - 1)) (b !! (y - 1))
+            ]
+        cost :: RhythmTree -> Int
+        cost (Single _) = 1
+        cost (Branch b) = sum (map cost b) + 1
