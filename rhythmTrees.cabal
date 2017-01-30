@@ -6,13 +6,13 @@ cabal-version:     >= 1.10
 executable RhythmTrees
   main-is:          Main.hs
   hs-source-dirs:   src
-  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom, split, HCodecs, containers, pretty-tree
+  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom, split, HCodecs, containers, pretty-tree, random
   default-language: Haskell2010
 
 library
-  exposed-modules:  RhythmTree, Exporter, Importer
+  exposed-modules:  RhythmTree, Exporter, Importer, Markov
   hs-source-dirs:   src
-  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom, split, HCodecs, containers, pretty-tree
+  build-depends:    base, lilypond, prettify, Euterpea, MonadRandom, split, HCodecs, containers, pretty-tree, random
   default-language: Haskell2010
 
 test-suite test
