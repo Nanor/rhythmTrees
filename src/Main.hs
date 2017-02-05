@@ -1,10 +1,12 @@
 module Main where
 
-import RhythmTree as RT
+import RhythmTree
 import Exporter
-import Euterpea
+import Euterpea (play)
 import Importer
+import Markov
 import System.Environment
+import Control.Monad
 
 main = do
     method : args <- getArgs
@@ -14,16 +16,22 @@ main = do
             let [path1, path2] = args
             music1 <- readMidi path1
             music2 <- readMidi path2
-            let tree1 = fromEuterpea $ head music1
-            let tree2 = fromEuterpea $ head music2
+            let tree1 = toRhythmTree $ head music1
+            let tree2 = toRhythmTree $ head music2
             print $ compareTrees tree1 tree2
         "makeTree" -> do
             let [path] = args
             music <- readMidi path
-            print $ fromEuterpea $ head music
-
-    -- print $ toLilypond (Branch [Branch [Single RT.Note, Single RT.Note], Single RT.Rest])
-    -- fn <- getArgs
-    -- music <- readMidi $ head fn
-    -- -- play music
-    -- (putStr . unlines) $ map (toAscii . fromEuterpea) music
+            print $ toRhythmTree $ head music
+        "play" -> do
+            let [path] = args
+            music <- readMidi path
+            play $ head music
+        "markov" -> do
+            let [path] = args
+            music <- readMidi path
+            let bars = toRhythmTrees $ head music
+            let transitions = generateTransition bars
+            let treeGen = generateTree transitions
+            trees <- replicateM 10 treeGen
+            play $ toEuterpea 10 $ Branch trees

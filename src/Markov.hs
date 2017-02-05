@@ -52,4 +52,4 @@ generateTree f = do
                 else do
                     b <- mapM (genTree (depth + 1) element) [0..element-1]
                     return $ Branch b
-                    
+              

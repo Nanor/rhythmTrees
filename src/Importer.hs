@@ -6,6 +6,7 @@ import RhythmTree as RT
 import Data.List
 import Data.Maybe
 import Data.Ratio
+import Control.Arrow
 
 -- Reads from a midi file into a Euterpea piece of music
 readMidi :: FilePath -> IO [Music1]
@@ -17,16 +18,16 @@ readMidi fn = do
             let Midi _ timeDiv tracks = midi
             return $ filter (/= Prim (E.Rest (0 % 1))) $ map (\ t -> fromMidi $ Midi SingleTrack timeDiv [t]) tracks
 
--- Turns a piece of music into a RhythmTree
-fromEuterpea :: Music1 -> RhythmTree
-fromEuterpea = simplify . toRhythmTree . unpack
+-- Turns a Euterpea Music1 into a RhythmTree
+toRhythmTree :: Music1 -> RhythmTree
+toRhythmTree = Branch . toRhythmTrees
 
--- Turns a sequence of note, duration pairs into a RhythmTree
-toRhythmTree :: [(RhythmElement, Rational)] -> RhythmTree
-toRhythmTree xs = Branch $ map inner $ splitIntoBars xs
+toRhythmTrees :: Music1 -> [RhythmTree]
+toRhythmTrees = map (simplify . inner) . splitIntoBars . unpack
     where
+        inner :: [(RhythmElement, Rational)] -> RhythmTree
         inner [(x, _)] = Single x
-        inner xs = Branch $ map inner $ splitEqually xs
+        inner xs = Branch . map inner $ splitEqually xs
 
 splitIntoBars :: [(RhythmElement, Rational)] -> [[(RhythmElement, Rational)]] 
 splitIntoBars l = inner [] l 1
@@ -64,32 +65,26 @@ splitIntoN = inner []
 
 -- Turns a piece of music into a sequence of notes and their durations
 unpack :: Music1 -> [(RhythmElement, Rational)]
-unpack music = removeNulls . toDurations . sortNotes . fst $ toPositions 0 music
-    where
-        -- Turns a piece of music into a list of RhythmElement and the point it time it's played
-        toPositions :: Rational -> Music1 -> ([(RhythmElement, Rational)], Rational)
-        toPositions n (Modify _ x) = toPositions n x
-        toPositions n (x :=: y) = (lX ++ lY, max tX tY)
-            where
-                (lX, tX) = toPositions n x
-                (lY, tY) = toPositions n y
-        toPositions n (x :+: y) = (lX ++ lY, tY)
-            where
-                (lX, tX) = toPositions n x
-                (lY, tY) = toPositions tX y
-        toPositions n x@(Prim _) = ([(noteType x, n), (RT.Rest, n + duration)], n + duration)
-                           where
-                               duration = dur x
-                               noteType (Prim (E.Note _ _)) = RT.Note
-                               noteType (Prim (E.Rest _)) = RT.Rest
-        -- Sorts a list of RhythmElements and their timings in order of timing, with the note coming last for simultaneous notes 
-        sortNotes :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
-        sortNotes = sortOn snd . reverse . sortOn fst
-        -- Turns a list of RhythmElements and their timings into a list of RhythmElements and their durations in sequence
+unpack = removeNulls . toDurations . sort . adjust . ((RT.Rest, 0) :) . toPositions
+    where 
+        toPositions :: Music1 -> [(RhythmElement, Rational)]
+        toPositions (Modify _ m) = toPositions m
+        toPositions (Modify _ (Prim (E.Rest 0)) :+: m) = toPositions m
+        toPositions (p@(Prim _) :=: y) = (convert p, 0) : toPositions y
+        toPositions (p@(Prim _) :+: y) = (convert p, 0) : map (fst &&& (+ dur p) . snd) (toPositions y)
+        toPositions (p@(Prim _)) = [(convert p, 0), (RT.Rest, dur p)]
+        toPositions (x :=: y) = toPositions x ++ toPositions y
+        toPositions m = error (take 1000 $ show m)
+        convert :: Music1 -> RhythmElement
+        convert (Prim (E.Note _ _)) = RT.Note
+        convert (Prim (E.Rest _)) = RT.Rest
         toDurations :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
         toDurations [] = []
-        toDurations [x] = []
+        toDurations [(RT.Rest, _)] = []
         toDurations (x:xs) = (fst x, snd (head xs) - snd x) : toDurations xs
+        sort = sortOn snd . reverse . sortOn fst
+        adjust :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
+        adjust = map (fst &&& ((% 16) . round . fromRational . (* 16) . snd))
         -- Removes any zero length RhythmElements
         removeNulls :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
         removeNulls = filter ((> 0) . snd)

@@ -12,5 +12,5 @@ spec :: Spec
 spec = 
     describe "toEuterpea" $
         it "should convert a tree to music" $
-            toEuterpea (Branch [Single RT.Note, Single RT.Note, Branch [Single RT.Note, Single RT.Note], Single RT.Note]) `shouldBe`
+            toEuterpea 1 (Branch [Single RT.Note, Single RT.Note, Branch [Single RT.Note, Single RT.Note], Single RT.Note]) `shouldBe`
                 line [note qn ((C, 3), []), note qn ((C, 3), []), note en ((C, 3), []), note en ((C, 3), []), note qn ((C, 3), [])]
