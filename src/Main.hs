@@ -19,10 +19,14 @@ main = do
             let tree1 = toRhythmTree $ head music1
             let tree2 = toRhythmTree $ head music2
             print $ compareTrees tree1 tree2
-        "makeTree" -> do
+        "tree" -> do
             let [path] = args
             music <- readMidi path
             print $ toRhythmTree $ head music
+        "draw" -> do
+            let [path] = args
+            music <- readMidi path
+            putStr $ toAscii $ toRhythmTree $ head music
         "play" -> do
             let [path] = args
             music <- readMidi path
@@ -35,3 +39,4 @@ main = do
             let treeGen = generateTree transitions
             trees <- replicateM 10 treeGen
             play $ toEuterpea 10 $ Branch trees
+            print $ Branch trees

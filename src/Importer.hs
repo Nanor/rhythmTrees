@@ -65,12 +65,11 @@ splitIntoN = inner []
 
 -- Turns a piece of music into a sequence of notes and their durations
 unpack :: Music1 -> [(RhythmElement, Rational)]
-unpack = removeNulls . toDurations . sort . adjust . ((RT.Rest, 0) :) . toPositions
+unpack = removeNulls . toDurations . sort . ((RT.Rest, 0) :) . adjust . toPositions
     where 
         toPositions :: Music1 -> [(RhythmElement, Rational)]
         toPositions (Modify _ m) = toPositions m
         toPositions (Modify _ (Prim (E.Rest 0)) :+: m) = toPositions m
-        toPositions (p@(Prim _) :=: y) = (convert p, 0) : toPositions y
         toPositions (p@(Prim _) :+: y) = (convert p, 0) : map (fst &&& (+ dur p) . snd) (toPositions y)
         toPositions (p@(Prim _)) = [(convert p, 0), (RT.Rest, dur p)]
         toPositions (x :=: y) = toPositions x ++ toPositions y
@@ -81,6 +80,7 @@ unpack = removeNulls . toDurations . sort . adjust . ((RT.Rest, 0) :) . toPositi
         toDurations :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
         toDurations [] = []
         toDurations [(RT.Rest, _)] = []
+        toDurations [(RT.Note, _)] = [(RT.Note, 1 % 16)]
         toDurations (x:xs) = (fst x, snd (head xs) - snd x) : toDurations xs
         sort = sortOn snd . reverse . sortOn fst
         adjust :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
