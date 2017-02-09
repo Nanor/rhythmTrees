@@ -32,10 +32,13 @@ main = do
             music <- readMidi path
             play $ head music
         "markov" -> do
-            let [path] = args
+            let [matchMethod, path] = args
+            matcher <- case matchMethod of
+                "siblings" -> return depthArityIndexMatcher
+                "path" -> return pathMatcher
             music <- readMidi path
             let bars = toRhythmTrees $ head music
-            let transitions = generateTransition bars
+            let transitions = generateTransition bars matcher
             let treeGen = generateTree transitions
             trees <- replicateM 10 treeGen
             play $ toEuterpea 10 $ Branch trees
