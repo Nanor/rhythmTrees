@@ -40,6 +40,6 @@ main = do
             let bars = concatMap toRhythmTrees $ concat music
             let transitions = generateTransition bars matcher
             let treeGen = generateTree transitions
-            bars <- replicateM 5 treeGen
+            bars <- replicateM 10 treeGen
             putStr $ toAscii $ Branch bars
-            play $ toEuterpea 5 $ Branch bars
+            play $ toEuterpea 10 $ Branch bars
