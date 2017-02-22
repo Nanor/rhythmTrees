@@ -1,0 +1,28 @@
+[ Branch [ Branch [ Branch [ Single Note
+                           , Single Note
+                           ]
+                  , Single Note
+                  ]
+         , Branch [ Single Note
+                  , Single Note
+                  ]
+         ]
+, Branch [ Branch [ Single Note
+                  , Branch [ Single Note
+                           , Single Note
+                           ]
+                  ]
+         , Branch [ Single Note
+                  , Single Note
+                  ]
+         ]
+, Branch [ Branch [ Single Note
+                  , Single Note
+                  ]
+         , Branch [ Branch [ Single Note
+                           , Single Note
+                           ]
+                  , Single Note
+                  ]
+         ]
+]
