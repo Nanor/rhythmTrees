@@ -88,3 +88,12 @@ unpack = removeNulls . toDurations . sort . ((RT.Rest, 0) :) . adjust . toPositi
         -- Removes any zero length RhythmElements
         removeNulls :: [(RhythmElement, Rational)] -> [(RhythmElement, Rational)]
         removeNulls = filter ((> 0) . snd)
+
+-- Get a RhythmTree from the raw serialised ASCII (from `show`)
+-- This should only be used for experimentation and not as a proper parser
+parseRawTree :: String -> RhythmTree
+parseRawTree = read
+
+-- Get list of RhythmTrees from a file
+parseTreeFile :: FilePath -> IO [RhythmTree]
+parseTreeFile = fmap read . readFile

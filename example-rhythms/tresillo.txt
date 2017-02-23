@@ -1,0 +1,10 @@
+[ Branch [ Single Note
+         , Branch [ Single Tie
+                  , Single Note
+                  ]
+         ]
+
+, Branch [ Single Rest
+         , Single Note
+         ]
+]
