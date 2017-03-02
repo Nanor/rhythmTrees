@@ -71,18 +71,18 @@ simplifyOnce (Branch a) = Branch $ map simplifyOnce $
                                      | otherwise                               = x : removeTiedRests (y:xs)
 simplifyOnce (Single a) = Single a
 
-compareTrees :: RhythmTree -> RhythmTree -> Int
+compareTrees :: RhythmTree -> RhythmTree -> Float
 compareTrees (Single a) (Single b) | a == b    = 0
                                    | otherwise = 1
-compareTrees (Single a) (Branch b) = sum (map (compareTrees (Single a)) b)
+compareTrees (Single a) (Branch b) = sum (map (compareTrees (Single a)) b) / fromIntegral (length b)
 compareTrees (Branch a) (Single b) = compareTrees (Single b) (Branch a)
-compareTrees (Branch a) (Branch b) = inner a b (length a) (length b)
+compareTrees (Branch a) (Branch b) = inner a b (length a) (length b) / fromIntegral (max (length a) (length b))
     where
-        inner :: [RhythmTree] -> [RhythmTree] -> Int -> Int -> Int
+        inner :: [RhythmTree] -> [RhythmTree] -> Int -> Int -> Float
         inner a b x y = inner1 x y
             where
                 inner1 a b = map inner2 [(i,j) | i <- [0..x], j <- [0..y]] !! (a * (y + 1) + b)
-                inner2 :: (Int, Int) -> Int
+                inner2 :: (Int, Int) -> Float
                 inner2 (0, 0) = 0
                 inner2 (i, 0) = inner1 (i - 1) 0 + cost (a !! (i - 1))
                 inner2 (0, j) = inner1 0 (j - 1) + cost (b !! (j - 1))
@@ -91,6 +91,6 @@ compareTrees (Branch a) (Branch b) = inner a b (length a) (length b)
                         inner1 i (j - 1) + cost (b !! (j - 1)),
                         inner1 (i - 1) (j - 1) + compareTrees (a !! (i - 1)) (b !! (j - 1))
                     ]
-        cost :: RhythmTree -> Int
+        cost :: RhythmTree -> Float
         cost (Single _) = 1
         cost (Branch b) = sum (map cost b) + 1
