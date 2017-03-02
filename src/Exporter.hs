@@ -38,4 +38,8 @@ toAscii :: RhythmTree -> String
 toAscii = drawTree . convert
     where
         convert (Branch b) = Node "" $ map convert b
-        convert (Single x) = Node (show x) [] 
+        convert (Single x) = Node (show x) []
+
+-- Serialise the RhythmTree as a naive representation of the datatype
+toRawFile :: [RhythmTree] -> FilePath -> IO ()
+toRawFile ts fp = writeFile fp (show ts)

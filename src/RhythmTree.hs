@@ -6,10 +6,10 @@ import Data.List.Split
 import Data.List
 
 data RhythmElement = Note | Tie | Rest
-    deriving (Show, Eq, Enum, Bounded, Ord)
+    deriving (Show, Eq, Enum, Bounded, Ord, Read)
 
 data RhythmTree = Single RhythmElement | Branch [RhythmTree]
-    deriving (Show, Eq)
+    deriving (Show, Eq, Read)
 
 contents :: RhythmTree -> [RhythmTree]
 contents (Branch a) = a
